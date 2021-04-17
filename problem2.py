@@ -5,6 +5,9 @@ HW1 Problem 2
 Fuel-rich operation of a bi-propellant rocket
 """
 k_b = 1.38e-23 # [J/K]
+R = 8.314 # [J/deg K* mol]
+Cp_H2O = 54.0 # [J/mol deg K]
+Cp_H2 = 37.0 # [J/mol deg K]
 
 def mdot_piece(gamma,mp,Tc):
     return np.sqrt((gamma*mp)/(k_b*Tc))*((gamma + 1.0)/2.0)\
@@ -48,6 +51,7 @@ ExpRat = 50
 d_t = 2e-3 # throat diameter [m]
 A_t = np.pi*(d_t/2.0)**2
 A_e = ExpRat*A_t
+print(A_e)
 gamma_H2O = 1.33 # (g)
 gamma_H2 = 1.41 # (g)
 gamma_avg = (gamma_H2O + gamma_H2)/2.0
@@ -83,19 +87,29 @@ mp_average = np.array([0.0,0.0,0.0,0.0])
 Isp = np.array([0.0,0.0,0.0,0.0])
 
 for i in np.arange(np.size(eps)):
+    print("Epsilon = %i" %eps[i])
     n_H2prod = 2.0*(float(eps[i]) - 1.0) # mols of H2 produced
     mp_H2 = n_H2prod*m_H2 # changes with eps
     mp = n_H2Oprod*m_H2O + n_H2prod*m_H2 # n_H2prod changes with eps
     mp_average[i] = mp/(n_H2Oprod + n_H2prod)
+    print("Average Molecular Mass %e" %mp_average[i])
+    Cp_mix = (n_H2prod*Cp_H2 + n_H2Oprod*Cp_H2O)/(n_H2prod + n_H2Oprod)
+    gamma_mix = Cp_mix/(Cp_mix - R)
+    print("Mixture gamma = %f" %gamma_mix)
     Q_avail = np.abs(2.0*deltaH_H2O + 2.0*(float(eps[i]) - 1.0)*deltaH_H2 \
     - 2.0*float(eps[i])*deltaH_H2 - deltaH_O2)
     Tcprime[i] = T0 + Q_avail/(n_H2Oprod*dHdT_H2O + n_H2prod*dHdT_H2)
-    m_dot = A_t*p_c*mdot_piece(gamma_avg,mp,Tcprime[i])
-    exhMachNumber = computeExhaustMachNumber(ExpRat,gamma_avg)
-    p_e = p_c*(1.0+(gamma_avg - 1.0)/(2.0)*exhMachNumber**2)**(-gamma_avg/(gamma_avg-1.0))
-    c_e = np.sqrt(((k_b*Tcprime[i])/mp) * (2.0*gamma_avg)/(gamma_avg - 1.0)\
-    *(1.0 - (p_e/p_c)**((gamma_avg - 1.0)/gamma_avg)))
+    m_dot = A_t*p_c*mdot_piece(gamma_mix,mp_average[i],Tcprime[i])
+    print("Mass flow rate %f" %m_dot)
+    exhMachNumber = computeExhaustMachNumber(ExpRat,gamma_mix)
+    print("Exit Mach Number %f" %exhMachNumber)
+    p_e = p_c*(1.0+(gamma_mix - 1.0)/(2.0)*exhMachNumber**2)**(-gamma_mix/(gamma_mix-1.0))
+    print("Exhaust pressure %f" %p_e)
+    c_e = np.sqrt(((k_b*Tcprime[i])/mp_average[i]) * (2.0*gamma_mix)/(gamma_mix - 1.0)\
+    *(1.0 - (p_e/p_c)**((gamma_mix - 1.0)/gamma_mix)))
+    print("Exhaust speed %f" %c_e)
     F = m_dot*c_e + (p_e - 0.0)*A_e # Thrust
+    print("Thrust %f" %F)
     Isp[i] = F/(m_dot*9.8)
 
 print(Tcprime)
