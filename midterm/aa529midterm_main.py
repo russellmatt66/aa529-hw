@@ -93,6 +93,23 @@ mhat_prod = float((nmols_CO2*molmass_CO2 + nmols_H2O*molmass_H2O)/(nmols_CO2 + n
 
 print("The average molecular mass of the products is %f [kg]" %mhat_prod)
 
-Isp_estimate = np.sqrt(Tc_prime/mhat_prod)
+Isp_Problem1 = np.sqrt(Tc_prime/mhat_prod)
 
-print("The specific impulse is estimated as %7.3f [s]" %Isp_estimate)
+print("The specific impulse for I.(v) is estimated as %7.3f [s]" %Isp_Problem1)
+
+"""
+Problem 2
+"""
+g0 = 9.81 # [m/s^{2}]
+eta_Thrust = 0.60
+t_firing = 50.0*86400.0 # [days] -> [s]
+alpha_ii = 25.0/(10.0**(3)) # [kg/kW] -> [kg/W]
+alpha_iii = alpha_ii/10.0 # Improved specific impulse from II.(iii)
+
+Isp_Problem2ii = (1.0/g0)*np.sqrt((2.0*eta_Thrust*t_firing)/alpha_ii)
+
+print("The optimal specific impulse for the maneuever described in II.(ii) is %7.3f" %Isp_Problem2ii)
+
+Isp_Problem2iii = (1.0/g0)*np.sqrt((2.0*eta_Thrust*t_firing)/alpha_iii)
+
+print("The optimal specific impulse with the improvement to power supply specific mass described in II.(iii) is %7.3f" %Isp_Problem2iii)
