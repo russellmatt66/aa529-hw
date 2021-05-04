@@ -43,7 +43,8 @@ HeatForm_O2l = -9.42 # product, [kJ/mol]
 HeatForm_CO2g = -393.50 # reactant, [kJ/mol]
 HeatForm_H2Og = -241.93 # reactant, [kJ/mol]
 Q_avail = HeatForm_CH4l + float(2*HeatForm_O2l) + float(a*HeatForm_CO2g) + float(b*HeatForm_H2Og)
-print(Q_avail)
+
+print("The reaction supplies %6.3f [kJ] to the surroundings" %np.abs(Q_avail))
 
 Tc_low = 300.0
 Tc_high = 6000.0
@@ -82,7 +83,16 @@ while(np.abs(Q_req - np.abs(Q_avail)) > eps): # Q_req for these products is also
     if(i > i_limit):
         sys.exit("Method of Available Heat failed, halting ...")
 
-print(i)
-print(Q_req)
-print(Q_avail)
-print(Tc_prime)
+print("The chamber temperature is calculated to be %7.3f [deg K]" %Tc_prime)
+
+nmols_CO2 = 1
+nmols_H2O = 2
+molmass_CO2 = 44.009e-3 # [kg/mol]
+molmass_H2O = 18.015e-3 # [kg/mol]
+mhat_prod = float((nmols_CO2*molmass_CO2 + nmols_H2O*molmass_H2O)/(nmols_CO2 + nmols_H2O))
+
+print("The average molecular mass of the products is %f [kg]" %mhat_prod)
+
+Isp_estimate = np.sqrt(Tc_prime/mhat_prod)
+
+print("The specific impulse is estimated as %7.3f [s]" %Isp_estimate)
