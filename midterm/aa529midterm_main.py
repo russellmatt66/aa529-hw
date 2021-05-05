@@ -3,9 +3,10 @@ Matt Russell
 University of Washington Department of Aeronautics & Astronautics
 AA529: Space Propulsion
 5/5/21
-Software for the midterm
+Code for the midterm
 """
 import numpy as np
+import matplotlib.pyplot as plt
 import sys
 
 def findIndex(T,T_instance):
@@ -99,6 +100,7 @@ print("The specific impulse for I.(v) is estimated as %7.3f [s]" %Isp_Problem1)
 
 """
 Problem 2
+A specific impulse calculation
 """
 g0 = 9.81 # [m/s^{2}]
 eta_Thrust = 0.60
@@ -113,3 +115,104 @@ print("The optimal specific impulse for the maneuever described in II.(ii) is %7
 Isp_Problem2iii = (1.0/g0)*np.sqrt((2.0*eta_Thrust*t_firing)/alpha_iii)
 
 print("The optimal specific impulse with the improvement to power supply specific mass described in II.(iii) is %7.3f" %Isp_Problem2iii)
+
+"""
+Problem 3
+Examining gridded-ion thruster performance scaling using a basic model for the effect
+of electron-impact ionization on operation
+"""
+""" Basic Parameters """
+V0 = 1300.0 # Thruster voltage [V]
+d_grid = 20.0 * 10**(-2) # grid diameter [m]
+d_chamber = 20.0 * 10**(-2) # chamber diameter [m]
+l_chamber = 15.0 * 10**(-2) # chamber length [m]
+theta_grid = 0.80 # Grid transparency
+theta_div = 10.0 # beam divergence [degrees]
+xi_c = 0.15 # ratio of doubly- to singly-ionized xenon ions
+eta_mass = 0.95 # proportion of the mass that is utilized for thrust
+mass_xenon = 131.0 * 1.67 * 10**(-27) # mass of a xenon atom [kg]
+U_I = 12.13 # first ionization energy [eV]
+U_ex1 = 11.60 # energy to excite atom of xenon [eV]
+Aa_over_Agrid = np.array([0.1, 1.0])
+
+""" Computed """
+A_grid = np.pi*(d_grid/2.0)**(2)
+V_chamber = np.pi*(d_chamber/2.0)**(2)*l_chamber
+alpha_mass = (1.0 + xi_c/2.0)/(1.0 + xi_c) # correction due to mass utilization inefficiency
+alpha_thrust = (1.0 + xi_c/np.sqrt(2.0))/(1.0 + xi_c) # thrust correction to account for ionization
+
+""" Electrons """
+Te = np.linspace(1.0,20.0,1000)
+me = 9.11*10**(-31) # [kg]
+e = 1.6*10**(-19) # [C]
+
+""" (i) """
+# R_ion = np.empty(Te.shape[0])
+# R_ex1 = np.empty(Te.shape[0])
+# U_Ieff = np.empty(Te.shape[0])
+#
+# for tidx in np.arange(Te.shape[0]):
+#     R_ion[tidx] = 10.0**(-20)*(-(1.031*10**(-4))*Te[tidx]**(2) + 6.386*np.exp(-(U_I)/Te[tidx])*np.sqrt((8.0*e*Te[tidx])/(np.pi*me)))
+#     R_ex1[tidx] = 1.931*10.0**(-19)*(np.exp(-U_ex1/Te[tidx])/np.sqrt(Te[tidx]))*np.sqrt((8.0*e*Te[tidx])/(np.pi*me))
+#     U_Ieff[tidx] = U_I + (R_ex1[tidx]/R_ion[tidx])*U_ex1
+
+R_ion = 10.0**(-20)*(-(1.031*10**(-4))*Te**(2) + 6.386*np.exp(-(U_I)/Te)*np.sqrt((8.0*e*Te)/(np.pi*me)))
+R_ex1 = 1.931*10.0**(-19)*(np.exp(-U_ex1/Te)/np.sqrt(Te))*np.sqrt((8.0*e*Te)/(np.pi*me))
+U_Ieff = U_I + (R_ex1/R_ion)*U_ex1
+
+U_IeffFig = plt.figure()
+plt.plot(Te,U_Ieff)
+plt.xlim((0.0,Te[Te.shape[0]-1]))
+plt.ylim(0.0,70.0)
+plt.axhline(y = U_I,linestyle = 'dashed')
+plt.title('Effective ionization energy for a Xenon gridded-ion thruster')
+plt.xlabel('Electron temperature [eV]')
+plt.ylabel('$U_{I}^{\\ast}$ [eV]')
+
+""" (ii) - (v) """
+VlossFig = plt.figure()
+eta_electricalFig = plt.figure()
+
+for value in Aa_over_Agrid:
+    VlossV0 = (1.0/(e*V0*1.6*10**(19)))*(U_Ieff + (5.0/2.0 - 2.0*theta_grid + (2.0 - theta_grid)*np.log(value*np.sqrt((2.0*mass_xenon)/(np.pi*me))))*Te)
+    fig = plt.figure(VlossFig.number)
+    plt.plot(Te,VlossV0,label="$\\frac{A_{a}}{A} = %3.2f$" %value)
+    eta_electrical = (1.0/(1.0 + (1.0/theta_grid)*VlossV0))
+    fig = plt.figure(eta_electricalFig.number)
+    plt.plot(Te,eta_electrical,label="$\\frac{A_{a}}{A} = %3.2f$" %value)
+    Temax_index = np.where(eta_electrical == np.max(eta_electrical))
+    Temax = Te[Temax_index[0]]
+    neutraldensity = (A_grid/V_chamber)*(1.0/(2.0*R_ion[Temax_index[0]]))*np.sqrt(Temax*1.6*10**(-19)/mass_xenon)
+    print("The neutral density at which the efficiency is maximized for area ratio %3.2f is %.1E" %(value,neutraldensity))
+    if(value == 0.1):
+        ni = neutraldensity
+        ionsoundspeed = np.sqrt(1.6*10**(-19)*Temax/mass_xenon) # [eV] -> [J] gives [m/s]
+        I_ion = e*A_grid*0.5*ni*ionsoundspeed
+        I_beam = theta_grid*I_ion
+        thrust_ideal = I_beam*np.sqrt(2.0*mass_xenon*V0/e)
+        mdot = (alpha_mass * I_beam * mass_xenon)/(e * eta_mass)
+        Isp_v = eta_mass * alpha_thrust * np.cos(theta_div*(np.pi/180.0)) * (thrust_ideal/(mdot*g0))
+        eta_thrust = eta_electrical[Temax_index[0]]*eta_mass*alpha_thrust**(2)*np.cos(theta_div*(np.pi/180.0))**(2)
+        print("The specific impulse for (v) is %f [sec]" %Isp_v)
+        print("The thrust efficiency for (v) is %f" %eta_thrust)
+
+Isp_ideal = (1.0/g0)*np.sqrt(2.0*e*V0/mass_xenon)
+print("The ideal specific impulse is %f [sec]" %Isp_ideal)
+
+fig = plt.figure(VlossFig.number)
+# plt.ylim((0.0,0.02))
+plt.xlim((Te[0],Te[Te.shape[0]-1]))
+plt.legend()
+plt.title('Power loss for a Xenon gridded-ion thruster')
+plt.xlabel('Electron temperature [eV]')
+plt.ylabel('$\\frac{V_{loss}}{V_{0}}$')
+
+fig = plt.figure(eta_electricalFig.number)
+plt.xlim((Te[0],Te[Te.shape[0]-1]))
+plt.ylim(top=1.0)
+plt.legend()
+plt.title('Electrical efficiency of a Xenon gridded-ion thruster')
+plt.xlabel('Electron temperature [eV]')
+plt.ylabel('$\\eta_{e}$')
+
+plt.show()
