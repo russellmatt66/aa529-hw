@@ -70,10 +70,7 @@ i = 0
 i_limit = 25
 while(np.abs(Q_req - np.abs(Q_avail)) > eps): # Q_req for these products is also a monotonically increasing function of temperature, quadratic
     j_prime = findIndex(T,Tc_prime) # index of guess, i.e, Tc_prime
-    print(j_prime)
-    print(Tc_prime)
     Q_req = np.trapz(CisobaricLinInterp_CO2[0:j_prime],T[0:j_prime]) + float(2*np.trapz(CisobaricLinInterp_H2O[0:j_prime],T[0:j_prime]))
-    print(Q_req)
     if(Q_req > np.abs(Q_avail)): # Tc_prime too high
         Tc_high = Tc_prime
         Tc_prime = float((Tc_low + Tc_high)/2)
@@ -147,15 +144,6 @@ me = 9.11*10**(-31) # [kg]
 e = 1.6*10**(-19) # [C]
 
 """ (i) """
-# R_ion = np.empty(Te.shape[0])
-# R_ex1 = np.empty(Te.shape[0])
-# U_Ieff = np.empty(Te.shape[0])
-#
-# for tidx in np.arange(Te.shape[0]):
-#     R_ion[tidx] = 10.0**(-20)*(-(1.031*10**(-4))*Te[tidx]**(2) + 6.386*np.exp(-(U_I)/Te[tidx])*np.sqrt((8.0*e*Te[tidx])/(np.pi*me)))
-#     R_ex1[tidx] = 1.931*10.0**(-19)*(np.exp(-U_ex1/Te[tidx])/np.sqrt(Te[tidx]))*np.sqrt((8.0*e*Te[tidx])/(np.pi*me))
-#     U_Ieff[tidx] = U_I + (R_ex1[tidx]/R_ion[tidx])*U_ex1
-
 R_ion = 10.0**(-20)*(-(1.031*10**(-4))*Te**(2) + 6.386*np.exp(-(U_I)/Te)*np.sqrt((8.0*e*Te)/(np.pi*me)))
 R_ex1 = 1.931*10.0**(-19)*(np.exp(-U_ex1/Te)/np.sqrt(Te))*np.sqrt((8.0*e*Te)/(np.pi*me))
 U_Ieff = U_I + (R_ex1/R_ion)*U_ex1
@@ -199,9 +187,11 @@ for value in Aa_over_Agrid:
 Isp_ideal = (1.0/g0)*np.sqrt(2.0*e*V0/mass_xenon)
 print("The ideal specific impulse is %f [sec]" %Isp_ideal)
 
+# Gussy the figures up
 fig = plt.figure(VlossFig.number)
-# plt.ylim((0.0,0.02))
+plt.ylim(bottom=0.0)
 plt.xlim((Te[0],Te[Te.shape[0]-1]))
+plt.xticks(np.linspace(Te[0],Te[Te.shape[0]-1],10))
 plt.legend()
 plt.title('Power loss for a Xenon gridded-ion thruster')
 plt.xlabel('Electron temperature [eV]')
@@ -209,7 +199,8 @@ plt.ylabel('$\\frac{V_{loss}}{V_{0}}$')
 
 fig = plt.figure(eta_electricalFig.number)
 plt.xlim((Te[0],Te[Te.shape[0]-1]))
-plt.ylim(top=1.0)
+plt.xticks(np.linspace(Te[0],Te[Te.shape[0]-1],10))
+plt.ylim((0.90,1.0))
 plt.legend()
 plt.title('Electrical efficiency of a Xenon gridded-ion thruster')
 plt.xlabel('Electron temperature [eV]')
