@@ -67,3 +67,19 @@ print("The power supply necessary to operate this system would weigh %f [kg]" %m
 u_exhaust = np.sqrt(2.0*e*V0/mass_xenon)
 
 print("The exhaust velocity is %f [m/s]" %u_exhaust)
+
+""" Problem 5 """
+Isp_5 = 1000.0 # [sec]
+P_5 = 1.0 # [atm]
+
+print("The exhaust velocity required for the given Isp in problem 5 is %f [m/s]" %(g0*Isp_5))
+
+IsobaricSpecificHeat_Carbon = 0.71 # [J/g K], room temperature - couldn't find anything else
+IsobaricSpecificHeat_Lithium = 3.60 # [J/g K], " " " " " "
+IsobaricSpecificHeat_Helium = 5.19 # [J/g K], " " " " " "
+
+# IsobaricSpecificHeat_List = [IsobaricSpecificHeat_Carbon, IsobaricSpecificHeat_Lithium, IsobaricSpecificHeat_Helium]
+#
+# for SpecificHeat in IsobaricSpecificHeat_List:
+#     Tc_idealideal = 10**(-3)*((g0*Isp_5)**(2))/(2.0*SpecificHeat) # mass conversion factor
+#     print("The chamber temperature in the ideal-ideal case is %f [K]" %Tc_idealideal)
