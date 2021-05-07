@@ -69,14 +69,61 @@ u_exhaust = np.sqrt(2.0*e*V0/mass_xenon)
 print("The exhaust velocity is %f [m/s]" %u_exhaust)
 
 """ Problem 5 """
+k_b = 1.38 * 10**(-23) # [m^2 kg s^-2 K^-1]
+h = 6.62 * 10**(-34) # planck's constant, [m^2 kg s^-1]
+c = 3.0 * 10**(8) # speed of light, [m s^-1]
+Joules_to_eV = 1.6 * 10**(19) # conversion factor: 1 [J] = 1.6*10**(19) [eV]
+
+# BASIC INFORMATION
+# Assume quasineutrality and only atoms, i.e, no molecules form (technically untrue but complicated)
+alpha_1 = 1.0
+alpha_1p = 1.0
+alpha_e = 1.0
+alpha_p = alpha_1 + alpha_1p + alpha_e
 Isp_5 = 1000.0 # [sec]
-P_5 = 1.0 # [atm]
 
-print("The exhaust velocity required for the given Isp in problem 5 is %f [m/s]" %(g0*Isp_5))
+# Atomic masses, i.e 1/N0
+He_AtomicMass = 4.00 * 1.67 * 10**(-27) # amu -> kg, He-4
+Li_AtomicMass = 7.02 * 1.67 * 10**(-27) # amu -> kg, Li-7
+C_AtomicMass = 12.00 * 1.67 * 10**(-27) # amu -> kg, Carbon-12
 
-IsobaricSpecificHeat_Carbon = 0.71 # [J/g K], room temperature - couldn't find anything else
-IsobaricSpecificHeat_Lithium = 3.60 # [J/g K], " " " " " "
-IsobaricSpecificHeat_Helium = 5.19 # [J/g K], " " " " " "
+# Ground State ionization energy
+He_GroundIonization = 24.59 # [eV]
+Li_GroundIonization = 5.39 # [eV]
+C_GroundIonization = 11.26 # [eV]
+
+# Energy levels are given in units of [1/cm] from NIST - multiply by h*c to turn into energy
+# These are the \beta_{k} from Jahn Ch.6
+He_Neutral_Excitation = 159856.0 # 1s^2 -> 1s2s and J = 0 -> 1
+Li_Neutral_Excitation = 14903.6 # 2s -> 2p and J = 1/2 -> 1/2
+C_Neutral_Excitation = 33735.2 # 2s^2 2p^2 -> 2s2p^3 and J = 0 -> 2
+
+# There are the \beta_{m} from Jahn Ch. 6
+He_SingIon_Excitation = 329179.3 # 1s -> 2p and J = 1/2 -> 1/2
+Li_SingIon_Excitation = 476034.2 # 1s^2 -> 1s2s and J = 0 -> 0
+C_SingIon_Excitation =  43003.3 # 2s^2 2p -> 2s 2p^2 and J = 1/2 -> 1/2
+
+# Collect numbers together to do computation in a for loop
+N0 = [1.0/He_AtomicMass, 1.0/Li_AtomicMass, 1.0/C_AtomicMass] # [1/kg]
+NeutralExcitation = 10**(2)*h*c*[He_Neutral_Excitation, Li_Neutral_Excitation, C_Neutral_Excitation] # [J], 1/cm -> 1/m and then to energy
+SingIonExcitation = 10**(2)*h*c[He_SingIon_Excitation, Li_SingIon_Excitation, C_SingIon_Excitation] # [J], 1/cm -> 1/m and then to energy
+GroundIonization = 1.0/Joules_to_eV)*[He_GroundIonization, Li_GroundIonization, C_GroundIonization] # [eV] - [J]
+
+xi = np.linspace(0.0,1.0,25) # What proportion of the flow's internal energy is lost
+Tc = np.empty((xi.shape[0],len(N0)) # Chamber temperature for a given xi and particular atom
+
+for element in N0:
+    for xidx in xi.shape[0]:
+        Tc[xidx] = (2.0/(3.0*k_b*alpha_p))*((g0*Isp_5)**(2)/(2.0*N0) - (1.0 - xi[xidx])*)
+
+# Isp_5 = 1000.0 # [sec]
+# P_5 = 1.0 # [atm]
+#
+# print("The exhaust velocity required for the given Isp in problem 5 is %f [m/s] " %(g0*Isp_5))
+#
+# IsobaricSpecificHeat_Carbon = 0.71 # [J/g K], room temperature - couldn't find anything else
+# IsobaricSpecificHeat_Lithium = 3.60 # [J/g K], " " " " " "
+# IsobaricSpecificHeat_Helium = 5.19 # [J/g K], " " " " " "
 
 # IsobaricSpecificHeat_List = [IsobaricSpecificHeat_Carbon, IsobaricSpecificHeat_Lithium, IsobaricSpecificHeat_Helium]
 #
