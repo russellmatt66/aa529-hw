@@ -21,7 +21,7 @@ LiqH2O2rxn_deltaH = 460.38 * 10**(3) * (1.0/1.6) * 10**(19) # [kJ]->[J]->[eV]
 print("The energy per reaction for liquid H2/O2 is %.2E [eV]" %LiqH2O2rxn_deltaH)
 
 """ Problem 2 """
-species = ["electrons", "xenon"]
+species = ["electron", "xenon"]
 n0 = 1.0*10**(18) # [1/m^{3}]
 Te = 10.0 # [eV]
 B0 = 0.02 # [T]
@@ -41,41 +41,40 @@ lambda_ie = 20.0 # Coulomb logarithm for ion-electron collisions
 # Part (b): Ion and Electron Cycloctron frequency
 i = 0
 for mass in mass_species:
-    r_larmor = mass*(E/(e*B0**(2)))
-    omega_c = e*B0/mass
-    print("The %s Larmor radius is %f []" $(species[i],r_larmor))
-    print("The %s cyclotron frequency is %f []" $(species[i],omega_c))
+    r_larmor = 10**(2)*mass*(E/(e*B0**(2))) # [cm] -> [m]
+    omega_c = e*B0/mass # [rad/s]
+    print("The %s Larmor radius is %f [m]" %(species[i],r_larmor))
+    print("The %s cyclotron frequency is %f [rad/s]" %(species[i],omega_c))
     i += 1
 
 # Part (c): ExB drift velocity
-v_EB = (E*B0)/B0**(2) # |ExB| = |E||B|
-print("The ExB drift velocity is %f []" %v_EB)
+v_EB = (E*B0)/B0**(2) # |ExB| = |E||B|, i.e, E and B are orthogonal
+print("The ExB drift velocity is %f [m/s]" %(10**(2)*v_EB)) # E: [V/cm] -> [V/m]
 
 # Part (d): Debye Length
-lambda_De = 6.9*np.sqrt(Te/n0) 
+lambda_De = 6.9*np.sqrt((11600.0)*Te/(10**(-6)*n0)) # Te: [eV] -> [K] and n0: [1/m^3] -> [1/cm^3]
 print("The Debye Length is %f [cm]" %lambda_De)
 
 # Part (e): Plasma Frequency
-v_the = np.sqrt(Te/me) #
-omega_p = v_the/lambda_De
-print("The plasma frequency is %f []" %omega_p)
+omega_p = np.sqrt((n0*e**(2))/(me*epsilon_0)) # [rad/s]
+print("The plasma frequency is %f [rad/s]" %omega_p)
 
 # Part (f): Ion-electron collision frequency
-nu_ie = n0*Z**(2)*lambda_ie*(1.6*10**(-9)*np.sqrt(mu)*Te**(-3/2)) # assume quasineutrality
-print("The ion-electron collision frequency is %f []" %nu_ie)
+nu_ie = (10**(-6)*n0)*Z**(2)*lambda_ie*(1.6*10**(-9)*np.sqrt(mu)*Te**(-3/2)) # n0: [1/m^3] -> [1/cm^3], assume quasineutrality
+print("The ion-electron collision frequency is %f [cm^3/s]" %nu_ie)
 
 """ Problem 3 """
 # Part (a): Symbolic math
 # Part (b): Compute components of electron conductivity tensor
-nu_e = 2.9*10**(-6)*n0*lambda*Te**(-3/2) # [1/sec]
+nu_e = 2.9*10**(-6)*(10**(-6))*n0*lambda_ie*Te**(-3/2) # [1/sec]
 Omega_H = (e*B0/me)/nu_e # recomputing omega_ce due to lack of foresight
-sigma_parallel_electrons = (n0*e**(2))/(me*nu_e) # []
-sigma_perp_electrons = sigma_parallel_electrons/(1.0 + Omega_H**(2)) # []
-sigma_Pederson_electrons = sigma_perp_electrons*Omega_H # []
+sigma_parallel_electrons = (n0*e**(2))/(me*nu_e) # [S/m]
+sigma_perp_electrons = sigma_parallel_electrons/(1.0 + Omega_H**(2)) # [S/m]
+sigma_Pederson_electrons = sigma_perp_electrons*Omega_H # [S/m]
 # Part(c): Compare magnetized conductivities to conductivity of copper
-print("The magnetized parallel electron conductivity is %f []" %sigma_parallel_electrons)
-print("The magnetized perpendicular electron conductivity is %f []" %sigma_perp_electrons)
-print("The magnetized parallel electron conductivity is %f []" %sigma_Pederson_electrons)
+print("The magnetized electron parallel conductivity is %f [Siemens/m]" %sigma_parallel_electrons)
+print("The magnetized electron perpendicular conductivity is %f [Siemens/m]" %sigma_perp_electrons)
+print("The magnetized electron Pederson conductivity is %f [Siemens/m]" %sigma_Pederson_electrons)
 
 """ Problem 4 """
 eta_thrust = 0.65 # thrust efficiency
