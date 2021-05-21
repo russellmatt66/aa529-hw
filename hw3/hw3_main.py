@@ -110,8 +110,9 @@ plt.semilogy(Te,Pwi_norm,label='Wall loss - Xenon')
 plt.semilogy(Te,Pb_norm+Pa_norm+PrPion_norm+Pwi_norm+Pwe_norm,label='Sum')
 plt.legend()
 plt.xlabel('Electron Temperature [eV]')
-plt.ylabel('Proportion')
+plt.ylabel('Normalized Power')
 plt.title('Power losses in a Xenon Hall Thruster')
+plt.xlim((Te[0],Te[Te.shape[0]-1]))
 
 """ Problem 3 """
 
