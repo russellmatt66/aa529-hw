@@ -4,6 +4,12 @@ University of Washington Aeronautics & Astronautics
 AA529: Space Propulsion HW3
 5/21/21
 """
+def phirel(Te,Te_trans):
+    if Te <= Te_trans: # Not yet at space-charge limited region
+        return -((1.6*10**(-19)*Te)/e)*np.log((1.0-GammaProd*(Te)**b)*np.sqrt(2.0*m_Xe/me)) # []
+    elif Te > Te_trans:
+        return -1.02*1.6*10**(-19)*(Te)/e # []
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy import special as sp
@@ -100,6 +106,13 @@ for pidx in np.arange(phi_rel.shape[0]):
 Pwe_norm = (1.0/Pd)*(1.0/4.0)*np.sqrt((8.0*1.6*10**(-19)*Te)/(np.pi*me))*ns*As*np.exp(e*phi_rel/(1.6*10**(-19)*Te))*2.0*1.6*10**(-19)*Te # []
 Pwi_norm = (1.0/Pd)*ns*v_is*As*(0.5*m_Xe*v_is**2 - e*phi_rel) # []
 
+sheathpotFig = plt.figure()
+plt.plot(Te,phi_rel)
+plt.xlabel('Electron Temperature [eV]')
+plt.ylabel('$\phi_{s}-\phi_{p} [V]$')
+plt.title('Relative sheath potential in a Xe Hall Thruster')
+plt.xlim((Te[0],Te[Te.shape[0]-1]))
+
 powerFig = plt.figure()
 plt.semilogy(Te,Pd_norm,label='Discharge')
 plt.semilogy(Te,Pb_norm,label='Beam')
@@ -115,8 +128,22 @@ plt.title('Power losses in a Xenon Hall Thruster')
 plt.xlim((Te[0],Te[Te.shape[0]-1]))
 
 """ Problem 3 """
-
 print("Problem 3 Computations")
+Te_thr = 27.0 # [eV]
+v_is = np.sqrt(1.6*10**(-19)*Te_thr/m_Xe) # [m/s]
+E_ion = 0.5*m_Xe*v_is**2 - e*phirel(Te_thr,Te_trans) # [J]
+E_ion = (1.0/1.6)*10**(19)*E_ion # [eV]
+# E_ion = 0.5*m_Xe*v_is**2 - e*((-1.6*10**(-19)*Te_thr)/e)*np.log((1.0-GammaProd*(Te_thr)**b)*np.sqrt(2.0*m_Xe/me))
+print("The energy at which ions impact the wall is %f [eV]" %E_ion)
+
+ji = e*ns*v_is # [C m^-2 s^-1]
+Y = 0.01*10**(-9) # [m^3/C]<-[mm^3/C]
+W = (10.81 + 14.00 + 28.09 + 2.0*15.99)*amutokg # [kg] - atomic weight of BNSiO2
+rho_BNSiO2 = 2.2*10**(-6)*10**(6) # [kg m^-3]<-[mg cm^-3]
+Avo_num = 6.22*10**(23) # Avogadros number
+Rdot = -(ji*W)/(rho_BNSiO2*e*Avo_num)*Y # [m/s]
+print("The erosion rate for (3b) is %.2E [m^3 mol/C s]" %Rdot)
+
 
 """ Problem 4 """
 
