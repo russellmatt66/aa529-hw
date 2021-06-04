@@ -57,9 +57,20 @@ pdiffmax_find = np.asarray(pdiff == np.amax(pdiff)).nonzero()
 pdiff_idx = pdiffmax_find[0] # pdiff has a global maxima
 pdiff_max = pdiff[pdiff_idx]
 print("P2c: The maximum pressure gradient is %f [atm]" %pdiff_max)
-print("P3c: The location of maximum pressure gradient is r = %3.2E [m]" %r2c[pdiff_idx])
+print("P2c: The location of maximum pressure gradient is r = %3.2E [m]" %r2c[pdiff_idx])
+
+F_blowing = (mu_0*J**2)/(4.0*np.pi)*(np.log(ra/rc) + 1.0) # [N]
+F_pumping = (mu_0*J**2)/(8.0*np.pi) # [N]
+Thrust = F_blowing + F_pumping # [N]
+
+print("P2d: The blowing force is %f [N]" %F_blowing)
+print("P2e: The pumping force is %f [N]" %F_pumping)
+print("P2f: The thrust is %f [N]" %Thrust)
+
+""" Problem 3 """
 
 
+""" Plotting """
 plt.figure(P2Fig_Btheta.number)
 plt.plot(r2,Btheta_ofr)
 plt.axvline(x = r2[Bmax_idx], ls = '--')
