@@ -21,6 +21,8 @@ def CalculateAlpha(C,V0,m0,xdot,Ldot,Rc,Rp,beta):
 amu_to_kg = 1.667e-27 # 1 [amu] = this many [kg]
 Joules_to_eV = (1.0/1.6)*10.0**19 # 1 [J] = this man [eV]
 Pascal_to_Atm = 9.869e-6 # 1 [Pa] = this many [atm]
+lbf_to_Newton = 4.448 # 1 [lbf] = this many [N]
+degF_to_degK = 255.927 # 1 [degF] = this many [degK]
 m_Xe = 131.0*amu_to_kg # [kg]<-[amu]
 g0 = 9.819 # [m/s^2], gravitational acceleration at sea level
 mu_0 = 4*np.pi*10**(-7) # [H/m]
@@ -100,6 +102,19 @@ for idx in np.arange(alphas.size): # Calculate for A,B, and C
     print("P3a: Thruster %i alpha = %f" %(idx+1,alphas[idx]))
     print("P3a: Thruster %i beta = %f" %(idx+1,betas[idx]))
     print("P3c: Thruster %i Lovberg parameter is %f" %(idx+1,Lovberg))
+
+""" Problem 4 """
+P = 90.0 # [W], Power input to 1965 Vela Resistojet
+T = 0.042*lbf_to_Newton # [N]<-[lbf], Thrust
+eta_T4 = 0.65 # Ad hoc thrust efficiency
+Temp_Heater = 1000.0*degF_to_degK # [degK]<-[degF], Heater is Resistance Element
+Cp_N2 = 1.32e3 # [J kg^-1 degK^-1] Specific Heat Constant Pressure  ~3000 deg K
+ue = np.sqrt(2.0*Cp_N2*Temp_Heater) # [m/s], exhaust speed
+# Comparing two different ways of calculating
+Isp1 = ue/g0
+print("P4: Estimated Specific Impulse Nozzle Flow Way is %f [s]" %Isp1)
+Isp2 = 2.0*(eta_T4/g0)*(P/T)
+print("P4: Estimated Specific Impulse Thrust Efficiency is %f [s]" %Isp2)
 
 """ Plotting """
 plt.figure(P2Fig_Btheta.number)
