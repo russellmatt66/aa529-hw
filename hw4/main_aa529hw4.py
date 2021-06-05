@@ -7,6 +7,16 @@ University of Washington Department of Aeronautics & Astronautics
 import numpy as np
 import matplotlib.pyplot as plt
 
+""" Functions """
+def CalculateBeta(Rc,Rp,C,L0):
+    beta = (Rc + Rp) * np.sqrt(C/L0)
+    return beta
+
+def CalculateAlpha(C,V0,m0,xdot,Ldot,Rc,Rp,beta):
+    alpha = 0.5 * (0.5 * C * V0**2)/(0.5 * m0 * xdot**2) \
+        *(Ldot/(Rc + Rp))**2 * beta**2
+    return alpha
+
 """ Constants """
 amu_to_kg = 1.667e-27 # 1 [amu] = this many [kg]
 Joules_to_eV = (1.0/1.6)*10.0**19 # 1 [J] = this man [eV]
@@ -68,7 +78,28 @@ print("P2e: The pumping force is %f [N]" %F_pumping)
 print("P2f: The thrust is %f [N]" %Thrust)
 
 """ Problem 3 """
+# [Thruster A, Thruster B, Thruster C]
+xdot = 5e4 # [m/s], Exhaust Speed
+Rc = np.array([5.0, 5.0, 50.0])*10**(-3) # [Ohm]<-[mOhm], Circuit Resistance
+Rp = np.array([5.0, 5.0, 5.0])*10**(-3) # [Ohm]<-[mOhm], Plasma Resistance
+Lc = np.array([10.0, 10.0, 10.0])*10**(-9) # [H]<-[nH], Stray Inductance
+C = np.array([10.0,10.0,10.0])*10**(-6) # [F]<-[uF], Capacitance
+V0 = np.array([3.0, 3.0, 7.0])*10**(3) # [V]<-[kV], Discharge Voltage
+ChannelAspectRatio = np.array([0.2, 0.05, 0.05]) #
+ChannelLength = np.array([20.0, 20.0, 20.0])*10**(-2) # [m]<-[cm]
+SlugMass = np.array([10.0, 10.0, 10.0])*10**(-6) # [g]<-[ug]
+alphas = np.empty((3))
+betas = np.empty((3))
 
+for idx in np.arange(alphas.size): # Calculate for A,B, and C
+    Lpdot = mu_0*ChannelAspectRatio[idx]*xdot
+    DeltaLp = mu_0*ChannelAspectRatio[idx]*ChannelLength[idx]
+    Lovberg = DeltaLp/Lc[idx]
+    betas[idx] = CalculateBeta(Rc[idx],Rp[idx],C[idx],Lc[idx]) # Lp(0) = 0
+    alphas[idx] = CalculateAlpha(C[idx],V0[idx],SlugMass[idx],xdot,Lpdot,Rc[idx],Rp[idx],betas[idx])
+    print("P3a: Thruster %i alpha = %f" %(idx+1,alphas[idx]))
+    print("P3a: Thruster %i beta = %f" %(idx+1,betas[idx]))
+    print("P3c: Thruster %i Lovberg parameter is %f" %(idx+1,Lovberg))
 
 """ Plotting """
 plt.figure(P2Fig_Btheta.number)
