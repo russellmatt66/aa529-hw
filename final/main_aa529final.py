@@ -56,6 +56,7 @@ for phi in phiS_minus_phiP:
     P_wi[idx] = P_wi[idx]/P_d
     P_w[idx] = P_we[idx] + P_wi[idx]
     E_ions[idx] = Joules_to_eV*k_B*eV_to_degK*Te[idx]*(0.5 + np.log(np.sqrt((2.0*m_i)/(np.pi*m_e))))
+    idx += 1
 
 plt.figure(Te_vs_Phi.number)
 plt.scatter(phiS_minus_phiP,Te)
