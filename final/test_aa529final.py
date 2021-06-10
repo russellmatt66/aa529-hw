@@ -19,11 +19,11 @@ amu_to_kg = 1.67e-27 # 1 amu = this many kg
 
 # phiS_minus_phiP = np.asarray([-50.0,-100.0,-150.0,-200.0]) # [V]
 phiS_minus_phiP = np.asarray([-200.0]) # <- Debugging why the total power explodes
-Te = np.linspace(2.0,15.0,1000) # [eV] thermal energy of the electrons
+Te = np.linspace(2.0,50.0,1000) # [eV] thermal energy of the electrons
 
 m_e = 9.11e-31 # [kg]
 m_i = 131.0*amu_to_kg # [kg]<-[amu] Xenon atomic mass
-n_s = 1.0e12/(cm_to_m**3) # [m^-3]<-[cm^-3] Quasineutral sheath density
+n_s = 0.25e12/(cm_to_m**3) # [m^-3]<-[cm^-3] Quasineutral sheath density
 
 r_out = 7.0*cm_to_m # [m]<-[cm]
 r_in = 3.0*cm_to_m # [m]<-[cm]
@@ -45,7 +45,7 @@ P_a = 2.0*I_d*(k_B*eV_to_degK*Te)/e # [W] = [J s^-1] = [A*J*degK^-1*degK*C^-1] P
 v_is = np.sqrt(k_B*eV_to_degK*Te/m_i) # [m/s] = sqrt([J*kg^-1])
 I_iw = n_s*v_is*e*A_w # [A] = [C*s^-1] = [m^-3*m*s^-1*C*m^2]
 UI_Star = fmod.UIstar(Te) # [eV] Effective ionization energy
-UIStarFig = plt.figure()
+# UIStarFig = plt.figure()
 # PR_plus_Pion = (1.0/e)*UI_Star*(I_b + I_iw) # Power losses due to radiation and ionization
 PR_plus_Pion = np.empty(Te.size)
 
